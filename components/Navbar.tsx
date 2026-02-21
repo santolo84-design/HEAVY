@@ -7,23 +7,16 @@ interface NavbarProps {
 export const Navbar: React.FC<NavbarProps> = ({ onHome }) => {
   const [hasKey, setHasKey] = useState(false);
 
+  // MODIFICA: Controlliamo se la chiave è presente nelle variabili d'ambiente di Netlify
   useEffect(() => {
-    const checkKey = async () => {
-      if (window.aistudio?.hasSelectedApiKey) {
-        const selected = await window.aistudio.hasSelectedApiKey();
-        setHasKey(selected);
-      }
-    };
-    checkKey();
+    // Il simbolo !! trasforma il testo della chiave in un valore Vero/Falso
+    const keyExists = !!import.meta.env.VITE_GEMINI_KEY;
+    setHasKey(keyExists);
   }, []);
 
-  const handleConnect = async () => {
-    if (window.aistudio?.openSelectKey) {
-      await window.aistudio.openSelectKey();
-      setHasKey(true);
-    } else {
-      window.open('https://ai.google.dev/gemini-api/docs/billing', '_blank');
-    }
+  // MODIFICA: Se l'utente clicca, lo mandiamo alla pagina per creare la chiave gratis
+  const handleConnect = () => {
+    window.open('https://aistudio.google.com/app/apikey', '_blank');
   };
 
   return (
