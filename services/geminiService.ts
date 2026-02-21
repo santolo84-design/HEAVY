@@ -54,11 +54,11 @@ export const analyzeTestDocument = async (
   base64Data: string,
   mimeType: string
 ): Promise<AnalysisResult> => {
-  if (!process.env.API_KEY || process.env.API_KEY === "") {
+  if (!import.meta.env.VITE_GEMINI_KEY || import.meta.env.VITE_GEMINI_KEY === "") {
     throw new Error("KEY_REQUIRED");
   }
 
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_KEY});
   const model = "gemini-3-flash-preview";
 
   try {
@@ -120,9 +120,9 @@ export const analyzeTestDocument = async (
 };
 
 export const generateGoogleFormScript = async (test: TestRecord, targetLanguage: string = 'original'): Promise<string> => {
-  if (!process.env.API_KEY) throw new Error("KEY_REQUIRED");
+  if (!import.meta.env.VITE_GEMINI_KEY) throw new Error("KEY_REQUIRED");
 
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_KEY });
   const model = "gemini-3-flash-preview";
 
   const isOriginal = targetLanguage.toLowerCase() === 'original';
@@ -167,11 +167,11 @@ export const translateTest = async (
   content: string,
   targetLanguage: string
 ): Promise<string> => {
-  if (!process.env.API_KEY || process.env.API_KEY === "") {
+  if (!import.meta.env.VITE_GEMINI_KEY || import.meta.env.VITE_GEMINI_KEY === "") {
     throw new Error("KEY_REQUIRED");
   }
 
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_KEY });
   const model = "gemini-3-flash-preview";
   try {
     const response = await ai.models.generateContent({
