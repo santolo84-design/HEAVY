@@ -13,13 +13,9 @@ export const TestUpload: React.FC<TestUploadProps> = ({ onUploadStart, onUploadE
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<{ message: string; type: 'auth' | 'general' | 'quota' } | null>(null);
 
-  const handleConnectKey = async () => {
-    if (window.aistudio?.openSelectKey) {
-      await window.aistudio.openSelectKey();
-      setError(null);
-    } else {
-      window.open('https://ai.google.dev/gemini-api/docs/billing', '_blank');
-    }
+  // MODIFICA: Invece di cercare Google, mandiamo l'utente a generare la chiave se manca
+  const handleConnectKey = () => {
+    window.open('https://aistudio.google.com/app/apikey', '_blank');
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -49,6 +45,8 @@ export const TestUpload: React.FC<TestUploadProps> = ({ onUploadStart, onUploadE
         });
 
         const base64 = await base64Promise;
+        
+        // Chiamata al servizio Gemini che ora usa VITE_GEMINI_KEY
         const analysis = await analyzeTestDocument(base64, file.type);
 
         if (!analysis.containsTest) {
@@ -71,20 +69,19 @@ export const TestUpload: React.FC<TestUploadProps> = ({ onUploadStart, onUploadE
         onSuccess(newRecord);
       } catch (err: any) {
         console.error(err);
+        // Gestione degli errori basata sulla chiave Netlify
         if (err.message === "KEY_REQUIRED") {
           setError({ 
-            message: `AUTHENTICATION REQUIRED: Please connect a Project Key to analyze files.`, 
+            message: `AUTHENTICATION REQUIRED: Please check your VITE_GEMINI_KEY on Netlify.`, 
             type: 'auth' 
           });
           break; 
         } else if (err.message === "QUOTA_EXHAUSTED") {
           setError({ 
-            message: `RATE LIMIT EXCEEDED: You've reached the Gemini API quota. Please check your plan.`, 
+            message: `RATE LIMIT EXCEEDED: You've reached the Gemini Free quota. Try again tomorrow.`, 
             type: 'quota' 
           });
           break;
-        } else if (err.message === "SERVICE_UNAVAILABLE") {
-          setError({ message: `SERVER ERROR: Gemini service is currently busy. Try again soon.`, type: 'general' });
         } else {
           setError({ message: `EXTRACTION FAILED: "${file.name}"`, type: 'general' });
         }
@@ -144,7 +141,7 @@ export const TestUpload: React.FC<TestUploadProps> = ({ onUploadStart, onUploadE
                 onClick={handleConnectKey}
                 className="mt-2 px-4 py-2 bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 font-black uppercase text-[9px] tracking-widest rounded-lg transition-all border border-indigo-500/30"
                >
-                 {error.type === 'quota' ? 'Check Billing' : 'Connect Key'}
+                 {error.type === 'quota' ? 'AI Dashboard' : 'Setup API Key'}
                </button>
              )}
            </div>
