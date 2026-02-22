@@ -2,7 +2,7 @@ import { supabase } from './supabaseClient';
 import { TestRecord } from '../types.ts';
 
 export const storageService = {
-  // Recupera tutti i test dal cloud di Supabase
+  // Recupera i test dal Cloud
   async getAllTests(): Promise<TestRecord[]> {
     const { data, error } = await supabase
       .from('tests')
@@ -10,34 +10,31 @@ export const storageService = {
       .order('uploadedAt', { ascending: false });
 
     if (error) {
-      console.error("Errore nel recupero dati:", error);
-      throw error;
+      console.error("Errore download:", error);
+      return [];
     }
     return data as TestRecord[];
   },
 
-  // Salva un nuovo test su Supabase
+  // Salva il test nel Cloud
   async saveTest(test: TestRecord): Promise<void> {
     const { error } = await supabase
       .from('tests')
-      .upsert(test); // Invia l'oggetto così com'è, rispettando le maiuscole
+      .upsert(test);
 
     if (error) {
-      console.error("Errore nel salvataggio:", error);
+      console.error("Errore salvataggio:", error);
       throw error;
     }
   },
 
-  // Elimina un test dal cloud
+  // Elimina il test dal Cloud
   async deleteTest(id: string): Promise<void> {
     const { error } = await supabase
       .from('tests')
       .delete()
       .eq('id', id);
 
-    if (error) {
-      console.error("Errore nell'eliminazione:", error);
-      throw error;
-    }
+    if (error) throw error;
   }
 };
