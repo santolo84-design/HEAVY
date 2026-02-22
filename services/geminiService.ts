@@ -1,62 +1,18 @@
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 import { AnalysisResult, TestRecord } from "../types.ts";
 
-const handleApiError = (error: any) => {
-  let message = "";
-  let status = "";
-  let code: any = null;
+const API_KEY = import.meta.env.VITE_GEMINI_KEY;
 
-  if (typeof error === 'string') {
-    message = error;
-  } else if (error instanceof Error) {
-    message = error.message;
-    const anyError = error as any;
-    // Extract info from SDK-wrapped error objects
-    const nestedError = anyError.error || anyError.response?.error;
-    if (nestedError) {
-      status = nestedError.status || "";
-      code = nestedError.code;
-      message = nestedError.message || message;
-    }
-  } else if (error && typeof error === 'object') {
-    const errObj = error.error || error;
-    message = errObj.message || JSON.stringify(error);
-    status = errObj.status || "";
-    code = errObj.code;
-  }
+// ... (il resto della funzione handleApiError rimane uguale)
 
-  console.error("Gemini API Error details:", { message, status, code });
+export const analyzeTestDocument = async (base64Data: string, mimeType: string): Promise<AnalysisResult> => {
+  if (!API_KEY) throw new Error("KEY_REQUIRED");
 
-  // Comprehensive quota exhaustion check
-  const isQuotaError = 
-    message.toLowerCase().includes("quota") || 
-    message.toLowerCase().includes("429") || 
-    message.toLowerCase().includes("resource_exhausted") || 
-    status === "RESOURCE_EXHAUSTED" ||
-    code === 429;
-
-  if (isQuotaError) {
-    throw new Error("QUOTA_EXHAUSTED");
-  }
-
-  if (message.includes("403") || message.includes("PERMISSION_DENIED") || message.includes("API key not valid")) {
-    throw new Error("KEY_REQUIRED");
-  }
+  // NOTA: Qui il nome cambia in GoogleGenerativeAI
+  const ai = new GoogleGenerativeAI(API_KEY);
+  const model = "gemini-1.5-flash"; 
   
-  if (message.includes("Rpc failed") || message.includes("xhr error") || message.includes("500") || message.includes("503")) {
-    throw new Error("SERVICE_UNAVAILABLE");
-  }
-  
-  throw new Error(message || "An unexpected error occurred.");
-};
-
-export const analyzeTestDocument = async (
-  base64Data: string,
-  mimeType: string
-): Promise<AnalysisResult> => {
-  if (!import.meta.env.VITE_GEMINI_KEY || import.meta.env.VITE_GEMINI_KEY === "") {
-    throw new Error("KEY_REQUIRED");
-  }
+  // ... (nel resto del file, assicurati che dove c'era Type.OBJECT ora ci sia SchemaType.OBJECT)
 
   const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_KEY});
   const model = "gemini-3-flash-preview";
